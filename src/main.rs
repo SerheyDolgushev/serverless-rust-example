@@ -17,5 +17,10 @@ async fn func(event: LambdaEvent<Value>) -> Result<Value, Error> {
 
     let first_name = event["firstName"].as_str().unwrap_or("world");
 
+    let panic = event["panic"].as_bool().unwrap_or(false);
+    if panic {
+        panic!("Panic greetings, {}!", first_name);
+    }
+
     Ok(json!({ "message": format!("Hello, {}!", first_name) }))
 }
