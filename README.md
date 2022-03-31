@@ -33,3 +33,26 @@ The output will contain function logs and response:
 {"message":"Hello, Sherlock!"}
 
 ```
+
+## Known issues
+
+Please be aware that local invoke will be stuck if the rust function is panicking ([AWS Local Invocation is stuck when rust is panicking](https://github.com/serverless/serverless/issues/10911)). The simplest way to reproduce it is to call:
+
+```bash
+npx serverless invoke local -f hello -d '{"panic": true}'
+```
+
+It can be fixed by manually killing the docker container by running the following command in a new terminal:
+
+```bash
+docker stop $(docker ps --filter "ancestor=sls-docker-provided" -q)
+```
+
+Once the docker container is killed the previously stuck function will be done, and its output will be printed:
+
+```bash
+...
+thread 'main' panicked at 'Panic greetings, world!', src/main.rs:22:9
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+...
+```
