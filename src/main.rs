@@ -15,12 +15,15 @@ async fn func(event: LambdaEvent<Value>) -> Result<Value, Error> {
 
     debug!("Event data: {}", event);
 
-    let first_name = event["firstName"].as_str().unwrap_or("world");
+    let response = match event["action"].as_str().unwrap_or("greet") {
+        "panic" => panic!("Panic: {}!", event["message"].as_str().unwrap_or("message")),
+        "get_variable" => {
+            let name = event["name"].as_str().unwrap_or("domain");
+            let value = std::env::var(name).unwrap_or(String::from("NOT_FOUND"));
+            json!({"name": name, "value": value})
+        }
+        _ => json!({ "greeting": format!("Hello, {}!", event["firstName"].as_str().unwrap_or("world")) })
+    };
 
-    let panic = event["panic"].as_bool().unwrap_or(false);
-    if panic {
-        panic!("Panic greetings, {}!", first_name);
-    }
-
-    Ok(json!({ "message": format!("Hello, {}!", first_name) }))
+    Ok(response)
 }

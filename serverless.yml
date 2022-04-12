@@ -2,6 +2,7 @@ service: demo
 provider:
     name: aws
     runtime: rust
+    stage: ${opt:stage, 'test'}
 plugins:
     - serverless-rust
 package:
@@ -9,6 +10,9 @@ package:
 functions:
     hello:
         handler: lambda
+        environment:
+            AccountElasticsearchDomainEndpoint:
+                Fn::ImportValue: account-${self:provider.stage}-AccountElasticsearchDomainEndpoint
 custom:
     rust:
         dockerless: true
